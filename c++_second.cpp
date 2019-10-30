@@ -8,8 +8,14 @@ class STACK {
 	int   pos;			//栈实际已有元素个数，栈空时pos=0;
 public:
 	STACK(int m) :max(m), elems((int*)malloc(sizeof(int)*m)) { pos = 0; }		//初始化栈：最多存m个元素
-	STACK(const STACK&s) :max(s.max), elems(s.elems) { pos = s.pos; } 			//用栈s拷贝初始化栈
-	//STACK(STACK&&s);       			//移动构造
+	STACK(const STACK&s) :max(s.max), pos(s.pos),elems((int*)malloc(sizeof(int)*s.max)) //用栈s拷贝初始化栈
+	{
+		for (int i = 0; i < pos; i++)
+		{
+			elems[i] = s.elems[i];
+		}
+	}
+	STACK(STACK&&s) :max(s.max), elems(s.elems), pos(s.pos) {};       			//移动构造
 	virtual int  size() const { return max; }			//返回栈的最大元素个数max
 	virtual operator int() const { return pos; }			//返回栈的实际元素个数pos
 	virtual int operator[ ] (int x) const
@@ -40,7 +46,7 @@ public:
 	}
 	virtual STACK& operator=(const STACK&s) //赋s给栈,并返回被赋值栈
 	{
-		if(s.max<=max)
+		if (s.max <= max)
 		{
 			int*p = (int*)&max;
 			*p = s.max;
@@ -52,21 +58,28 @@ public:
 		}
 		else
 		{
-			int*p=(int*)&max;
-			*p=s.max;
-			pos=s.pos;
+			int*p = (int*)&max;
+			*p = s.max;
+			pos = s.pos;
 			free(elems);
-			int**q=&elems;
-			*q=(int*)malloc(s.max*sizeof(int));
+			int**q = (int**)&elems;
+			*q = (int*)malloc(s.max * sizeof(int));
 			for (int i = 0; i < s.pos; i++)
 			{
 				elems[i] = s.elems[i];
 			}
 		}
-		
+
 		return *this;
 	}
-	//virtual STACK &operator=(STACK&&s);  //移动赋值
+	virtual STACK &operator=(STACK&&s)  //移动赋值
+	{
+		*(int**)&elems = s.elems;
+		*(int**)&s.elems = 0;
+		*(int*)max = s.max;
+		pos = s.pos;
+		return *this;
+	}
 	virtual void print() const			//打印栈
 	{
 		for (int i = 0; i < pos; i++)
@@ -88,7 +101,7 @@ void main(int argc, char* argv[])
 	const char*s6 = "-N";//栈中剩余元素个数
 	const char*s7 = "-G";//命令“-G  1”表示得到栈中下标为1的元素（即栈的第2个元素）。
 	cout << "S ";
-	cout << atoi(argv[2])<<' ';
+	cout << atoi(argv[2]) << ' ';
 	STACK stk(atoi(argv[2]));//第一个参数必定为创建栈
 	while (i != argc)
 	{
